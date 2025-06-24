@@ -1,4 +1,3 @@
-// src/components/StatusSummary.jsx
 import React from "react";
 import { FiCpu, FiWifi, FiWifiOff } from "react-icons/fi";
 

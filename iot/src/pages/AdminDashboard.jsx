@@ -1,5 +1,4 @@
-// AdminDashboard.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TemperatureChart from "../components/TemperatureChart";
 import UserList from "../components/UserList";
 import UserProfileCard from "../components/UserProfileCard";
@@ -16,8 +15,14 @@ const mockUsers = [
   },
   {
     id: "user02",
-    name: "Vignan",
-    email: "vignan@gmail.com",
+    name: "Harshit",
+    email: "Harshit@gmail.com",
+    role: "User",
+  },
+  {
+    id: "user03",
+    name: "Abhay",
+    email: "Abhay@gmail.com",
     role: "User",
   },
 ];
@@ -25,6 +30,32 @@ const mockUsers = [
 const AdminDashboard = () => {
   const [view, setView] = useState("chart");
   const [selectedUser, setSelectedUser] = useState(null);
+  const [devices, setDevices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDevices = () => {
+      fetch("http://localhost:3001/api/devices")
+        .then((res) => res.json())
+        .then((data) => {
+          setDevices(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch devices:", err);
+          setLoading(false);
+        });
+    };
+
+    fetchDevices(); // initial fetch
+    const interval = setInterval(fetchDevices, 5000); // refresh every 5 seconds
+    return () => clearInterval(interval); // cleanup
+  }, []);
+
+  const chartDataPoints = devices.map((d) => ({
+    timestamp: new Date(d.timestamp).toLocaleTimeString(),
+    temp: d.temp,
+  }));
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col lg:flex-row">
@@ -52,28 +83,22 @@ const AdminDashboard = () => {
 
       {/* Main Content */}
       <main className="flex-1 p-6">
-        {view === "chart" && (
-          <TemperatureChart
-            dataPoints={[
-              { timestamp: "10:00", temp: 22 },
-              { timestamp: "11:00", temp: 23 },
-              { timestamp: "12:00", temp: 24 },
-              { timestamp: "13:00", temp: 25 },
-            ]}
-          />
+        {loading ? (
+          <p className="text-gray-600">Loading chart data...</p>
+        ) : (
+          <>
+            {view === "chart" && <TemperatureChart dataPoints={chartDataPoints} />}
+            {view === "users" && selectedUser === null && (
+              <UserList users={mockUsers} onSelect={(user) => setSelectedUser(user)} />
+            )}
+            {view === "users" && selectedUser && (
+              <UserProfileCard user={selectedUser} />
+            )}
+            {view === "devices" && <DeviceManagement />}
+            {view === "access" && <AccessControl users={mockUsers} />}
+            {view === "support" && <SupportResources />}
+          </>
         )}
-
-        {view === "users" && selectedUser === null && (
-          <UserList users={mockUsers} onSelect={(user) => setSelectedUser(user)} />
-        )}
-
-        {view === "users" && selectedUser && (
-          <UserProfileCard user={selectedUser} />
-        )}
-
-        {view === "devices" && <DeviceManagement />}
-        {view === "access" && <AccessControl users={mockUsers} />}
-        {view === "support" && <SupportResources />}
       </main>
     </div>
   );

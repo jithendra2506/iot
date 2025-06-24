@@ -6,7 +6,7 @@ const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'error' or 'success'
+  const [messageType, setMessageType] = useState(""); 
 
   const validateEmail = (email) => {
     return /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email);
