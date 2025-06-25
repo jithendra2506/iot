@@ -6,11 +6,12 @@ import StatusSummary from "../components/StatusSummary";
 const DeviceDataPage = () => {
   const [devices, setDevices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDevices = () => {
-      fetch("http://localhost:3001/api/devices") 
+      fetch("http://localhost:3001/api/devices")
         .then((res) => res.json())
         .then((data) => {
           setDevices(data);
@@ -22,19 +23,38 @@ const DeviceDataPage = () => {
         });
     };
 
-    fetchDevices(); 
+    fetchDevices();
     const interval = setInterval(fetchDevices, 5000);
-    return () => clearInterval(interval); 
+    return () => clearInterval(interval);
   }, []);
 
   const handleSearch = (e) => setSearchTerm(e.target.value);
+
+  const handleSendReport = () => {
+    if (!userEmail || !userEmail.includes("@")) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    fetch("http://localhost:3001/api/email/send-report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: userEmail }),
+    })
+      .then((res) => res.text())
+      .then((msg) => alert(msg))
+      .catch((err) => {
+        console.error("Failed to send report:", err);
+        alert("Failed to send report.");
+      });
+  };
 
   const filteredDevices = devices.filter((device) =>
     String(device.id).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const chartDataPoints = filteredDevices.map((d) => ({
-    timestamp: new Date(d.timestamp).toLocaleTimeString(), 
+    timestamp: new Date(d.timestamp).toLocaleTimeString(),
     temp: d.temp,
   }));
 
@@ -63,8 +83,29 @@ const DeviceDataPage = () => {
               <DeviceTable devices={filteredDevices} />
             </section>
 
-            <section className="bg-white p-6 rounded-xl shadow-lg">
+            <section className="bg-white p-6 rounded-xl shadow-lg mb-6">
               <TemperatureChart dataPoints={chartDataPoints} />
+            </section>
+
+            <section className="bg-white p-6 rounded-xl shadow-lg">
+              <h2 className="text-lg font-semibold mb-2 text-gray-700">
+                📧 Send Report via Email
+              </h2>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg w-full sm:w-auto"
+                />
+                <button
+                  onClick={handleSendReport}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+                >
+                  📤 Send Report
+                </button>
+              </div>
             </section>
           </>
         )}

@@ -1,7 +1,4 @@
-// controllers/deviceController.js
 const pool = require('../db');
-
-// GET /api/devices
 const getAllDevices = async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM devices ORDER BY timestamp DESC');
@@ -12,7 +9,6 @@ const getAllDevices = async (req, res) => {
   }
 };
 
-// POST /api/devices
 const addDevice = async (req, res) => {
   const { temp, humidity, status, timestamp } = req.body;
   try {
@@ -22,7 +18,7 @@ const addDevice = async (req, res) => {
     );
     res.json(result.rows[0]);
   } catch (err) {
-    console.error("🚨 REAL ERROR:", err.message); // Add this
+    console.error("🚨 REAL ERROR:", err.message); 
     res.status(500).send("Error adding device");
   }
 };
