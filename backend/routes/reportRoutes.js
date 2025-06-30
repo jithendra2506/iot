@@ -8,7 +8,6 @@ router.post("/send-report", async (req, res) => {
   try {
     const { to, devices } = req.body;
 
-    // 1. Generate PDF
     const doc = new PDFDocument();
     const buffers = [];
 
@@ -16,12 +15,11 @@ router.post("/send-report", async (req, res) => {
     doc.on("end", async () => {
       const pdfBuffer = Buffer.concat(buffers);
 
-      // 2. Send Email with Attachment
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
           user: "yourgmail@gmail.com",
-          pass: "your-app-password" // not your Gmail password!
+          pass: "your-app-password" 
         }
       });
 

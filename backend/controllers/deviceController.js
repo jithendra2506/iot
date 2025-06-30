@@ -1,4 +1,5 @@
 const pool = require('../db');
+
 const getAllDevices = async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM devices ORDER BY timestamp DESC');
@@ -23,4 +24,25 @@ const addDevice = async (req, res) => {
   }
 };
 
-module.exports = { getAllDevices, addDevice };
+const deleteDeviceById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query("DELETE FROM devices WHERE id = $1", [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Device not found" });
+    }
+
+    res.status(200).json({ message: "Device deleted successfully" });
+  } catch (err) {
+    console.error("❌ Failed to delete device:", err);
+    res.status(500).json({ error: "Failed to delete device" });
+  }
+};
+
+module.exports = {
+  getAllDevices,
+  addDevice,
+  deleteDeviceById, 
+};
